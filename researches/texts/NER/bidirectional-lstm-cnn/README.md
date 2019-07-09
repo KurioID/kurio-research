@@ -4,7 +4,7 @@ In this paper, we describe the implementation of Named-Entity Recognition (NER) 
 
 ## Architecture
 
-For the base model architecture, please refer to our paper here: https://www.sciencedirect.com/science/article/pii/S1877050918314832
+For the base model architecture, please refer to our paper here: [https://www.sciencedirect.com/science/article/pii/S1877050918314832](https://www.sciencedirect.com/science/article/pii/S1877050918314832)
 
 ## Corpus
 
