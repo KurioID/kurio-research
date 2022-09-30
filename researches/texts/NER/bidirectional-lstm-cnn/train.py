@@ -17,16 +17,16 @@ import csv
 import os
 import time
 
-from keras.callbacks import EarlyStopping
-from keras.layers.convolutional import Convolution1D
-from keras.layers import Bidirectional, Embedding, LSTM, concatenate
-from keras.layers.core import Dense, SpatialDropout1D
-from keras.models import Input, Model
-from keras.preprocessing.sequence import pad_sequences
-from sklearn.model_selection import train_test_split
-from sklearn import metrics
 import numpy as np
 import tensorflow as tf
+from sklearn import metrics
+from sklearn.model_selection import train_test_split
+from tensorflow.keras import Input
+from tensorflow.keras.callbacks import EarlyStopping
+from tensorflow.keras.layers import (LSTM, Bidirectional, Conv1D, Dense, Embedding,
+                          SpatialDropout1D, concatenate)
+from tensorflow.keras.models import Model
+from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 train_directory = os.getenv("TRAIN_DIR", "dataset")
 word_embedding_directory = os.getenv("WORD_EMBEDDING_DIR", "word-embedding")
@@ -112,10 +112,10 @@ def load_word2vec(directory, meta_filename, vocab_filename):
             vocabulary.append(line.strip())
 
     meta_filename = os.path.join(directory, meta_filename)
-    with tf.Session() as sess:
-        saver = tf.train.import_meta_graph(meta_filename)
+    with tf.compat.v1.Session() as sess:
+        saver = tf.compat.v1.train.import_meta_graph(meta_filename)
         saver.restore(sess, os.path.join(directory, "model.ckpt"))
-        tvars = tf.trainable_variables(scope="embeddings")
+        tvars = tf.compat.v1.trainable_variables(scope="embeddings")
         vectors = sess.run(tvars[0])
 
     return vocabulary, vectors
@@ -189,15 +189,15 @@ def get_model(embeddings_layer, sequence_length, nb_classes):
     embedded = embeddings_layer(word_input)
     embedded_d = SpatialDropout1D(0.4)(embedded)
 
-    conv1 = Convolution1D(filters=64, kernel_size=2, padding="same",
+    conv1 = Conv1D(filters=64, kernel_size=2, padding="same",
                           activation="relu")(embedded_d)
-    conv2 = Convolution1D(filters=64, kernel_size=4, padding="same",
+    conv2 = Conv1D(filters=64, kernel_size=4, padding="same",
                           activation="relu")(embedded_d)
-    conv3 = Convolution1D(filters=64, kernel_size=6, padding="same",
+    conv3 = Conv1D(filters=64, kernel_size=6, padding="same",
                           activation="relu")(embedded_d)
-    conv4 = Convolution1D(filters=64, kernel_size=8, padding="same",
+    conv4 = Conv1D(filters=64, kernel_size=8, padding="same",
                           activation="relu")(embedded_d)
-    conv5 = Convolution1D(filters=64, kernel_size=10, padding="same",
+    conv5 = Conv1D(filters=64, kernel_size=10, padding="same",
                           activation="relu")(embedded_d)
 
     merge_layer = concatenate([conv1, conv2, conv3, conv4, conv5],
@@ -266,7 +266,7 @@ def save_model(model, directory, filename):
     if not os.path.exists(directory):
         os.makedirs(directory)
 
-    model.save(filename)
+    model.save(filename, save_format='h5')
     print('model has been save')
 
 
